@@ -1,0 +1,306 @@
+/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License version 2 and
+* only version 2 as published by the Free Software Foundation.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*/
+/*
+* sagitar subtype_id is 0x41
+* sagitare subtype_id is 0x42
+* sagitarr subtype_id is 0x43
+* sagitart subtype_id is 0x44
+* sagitarw subtype_id is 0x45
+*/
+/dts-v1/;
+
+/*#include "msm8916-mtp.dtsi"*/
+#include "msm8916-mtp-sagitar.dtsi"
+
+/ {
+	model = "Qualcomm MSM 8916 MTP SAGITAR";
+	compatible = "qcom,msm8916-mtp", "qcom,msm8916", "qcom,mtp", "lenovo,sagitar";
+	qcom,board-id = <8 0x41>;
+};
+
+&qcom_tzlog {
+	status = "okay";
+};
+
+&qcom_rng {
+	status = "okay";
+};
+
+&qcom_crypto {
+	status = "okay";
+};
+
+&qcom_cedev {
+	status = "okay";
+};
+
+&qcom_seecom {
+	status = "okay";
+};
+
+&tlmm_pinmux {
+	apds9930_int_pin {
+		qcom,pins = <&gp 113>;
+		qcom,pin-func = <0>;
+		qcom,num-grp-pins = <1>;
+		label = "apds9930-irq";
+		apds9930_default: apds9930_default {
+			drive-strenghth = <6>;
+			bias-pull-up;
+		};
+	};
+
+	hall_int_pin {
+		qcom,pins = <&gp 111>;
+		qcom,pin-func = <0>;
+		qcom,num-grp-pins = <1>;
+		label = "hall-irq";
+		hall_int_pin_on: hall_pinctrl1 {
+			drive-strenghth = <6>;
+			bias-pull-up;
+		};
+		hall_int_pin_off: hall_pinctrl2 {
+			drive-strenghth = <2>;
+			bias-disable;
+		};
+	};
+};
+
+&i2c_0 { /* BLSP1 QUP2 */
+	avago@39 {
+		compatible = "avago,apds9930";
+		reg = <0x39>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&apds9930_default>;
+		interrupt-parent = <&msm_gpio>;
+		interrupts = <113 0x2>;
+		vdd-supply = <&pm8916_l17>;
+		vio-supply = <&pm8916_l6>;
+		avago,irq-gpio = <&msm_gpio 113 0x2>;
+		avago,ps_threshold = <600>;
+		avago,ps_hysteresis_threshold = <500>;
+		avago,ps_pulse = <8>;
+		avago,ps_pgain = <0>;
+		avago,als_B = <223>;
+		avago,als_C = <70>;
+		avago,als_D = <142>;
+		avago,ga_value = <48>;
+	};
+/*lenovo-sw molg 20140428 add begin*/
+	st@1d {
+		compatible = "st,lsm303d";
+		reg = <0x1d>;
+		vdd-supply = <&pm8916_l17>;
+		vcc_i2c-supply = <&pm8916_l6>;
+		st,cs-gpio = <&msm_gpio 121 0x00>;
+	};
+/*lenovo-sw molg 20140428 add end*/
+};
+
+/*lenovo add by jixu@lenovo.com begin*/
+&i2c_4 {
+		sn3193@68 {
+			compatible = "lenovo,sn3193";
+			reg = <0x68>;
+			lenovo,en-gpio = <&msm_gpio 38 0x00>;
+		};
+
+		bq24296@6b {
+			compatible = "ti,bq24296-charger";
+			reg = <0x6b>;
+			interrupt-parent = <&msm_gpio>;
+			interrupts = <62 8>;
+			ti,irq-gpio = <&msm_gpio 62 0x2008>;
+			ti,en-gpio = <&msm_gpio 52 0x00>;
+			ti,interrupts = <62 0x2008>;
+			ti,current-limit = <1500>;
+			ti,chg-current = <1500>;
+			ti,cv-vol = <4350>;
+			ti,term-current = <256>;
+        };
+
+		max17058@36 {
+			compatible = "max,max17058-fg";
+			reg = <0x36>;
+			qcom,fg-vadc = <&pm8916_vadc>;
+        };	
+};
+&sdhc_2 {
+  status = "disabled";
+};
+&pm8916_mpps{
+    mpp@a100 {
+        status = "ok";
+    };
+};
+
+/*lenovo add by jixu@lenovo.com end*/
+
+
+&i2c_6 { /* BLSP1 QUP6 */
+	6-0028@28 {
+		compatible = "nxp,nfc-547";
+		reg = <0x28>;
+          /*
+		qcom,irq-gpio = <&msm_gpio 21 0x00>;
+		qcom,dis-gpio = <&msm_gpio 20 0x00>;
+		qcom,clk-src = "BBCLK2";
+		qcom,clk-en-gpio = <&msm_gpio 0 0x00>;
+          */
+		interrupt-parent = <&msm_gpio>;
+		interrupts = <21 0>;
+          /*
+		interrupt-names = "nfc_irq";
+		pinctrl-names = "nfc_active","nfc_suspend";
+		pinctrl-0 = <&nfc_int_active &nfc_disable_active>;
+		pinctrl-1 = <&nfc_int_suspend &nfc_disable_suspend>;
+		*/
+		nxp-nfc-547,irq-gpio = <&msm_gpio 21 0x00>;
+		nxp-nfc-547,ven-gpio = <&msm_gpio 20 0x00>;
+		nxp-nfc-547,firm-gpio = <&msm_gpio 114 0x00>;
+		qcom,clk-gpio = <&pm8916_gpios 2 0>;
+		clocks = <&clock_rpm clk_bb_clk2>;
+		clock-names = "nfc_clk";
+	};
+};
+
+&spmi_bus {
+	qcom,pm8916@1 {
+		qcom,vibrator@c000 {
+			status = "okay";
+			qcom,vib-timeout-ms = <15000>;
+			qcom,vib-vtg-level-mV = <3100>;
+		};
+	};
+/*lenovo add by jixu@lenovo.com begin*/
+	qcom,pm8916@0 {
+		qcom,leds@a100 {
+		compatible = "qcom,leds-qpnp";
+		reg = <0xa100 0x100>;
+		status = "ok";
+                qcom,kpdbl1 {
+			label = "mpp";
+			linux,name = "button-backlight";
+			linux,default-trigger = "hr-trigger";
+			qcom,default-state = "on";
+			qcom,max-current = <40>;
+			qcom,id = <6>;
+			qcom,source-sel = <1>;
+			qcom,mode-ctrl = <0x60>;
+			qcom,mode = "manual";
+                };
+	    };
+	};
+/*lenovo add by jixu@lenovo.com end*/
+};
+
+/* lenovo-sw yexh1, add for usb driver current setting, 2014-04-16 add begin */
+&usb_otg{ 
+         usb@78d9000 {
+                qcom,hsusb-otg-phy-init-seq = <0x44 0x80 0x6F 0x81 0x20 0x82 0x13 0x83 0xffffffff>;
+    };    
+};
+/* lenovo-sw yexh1 end */
+
+&soc {
+	hall {
+		status = "okay";
+		compatible = "lenovo,hall";
+		vdd-supply = <&pm8916_l6>;
+		interrupt-parent = <&msm_gpio>;
+		interrupts = <111 0x00>;
+		lenovo,irq-gpio = <&msm_gpio 111 0x00>;
+		/* pinctrl-states = "default"; */
+		pinctrl-names = "hall_pinctrl_on", "hall_pinctrl_off";
+		pinctrl-0 = <&hall_int_pin_on>;
+		pinctrl-1 = <&hall_int_pin_off>;
+	};
+};
+
+/* lenovo-sw wengjun1, 2014-04-18 add begin */
+&i2c_5 { /* BLSP1 QUP5 */
+		synaptics@38 {
+			compatible = "synaptics_z2,rmi4";
+			reg = <0x38>;
+			interrupt-parent = <&msm_gpio>;
+			interrupts = <13 0x2008>;
+			vdd-supply = <&pm8916_l17>;
+			vcc_i2c-supply = <&pm8916_l6>;
+			/* pins used by touchscreen */
+			pinctrl-names = "pmx_ts_active","pmx_ts_suspend";
+			pinctrl-0 = <&ts_int_active &ts_reset_active>;
+			pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+			synaptics,display-coords = <0 0 719 1279>;
+			synaptics,panel-coords = <0 0 719 1279>;
+			synaptics,irq-gpio = <&msm_gpio 13 0x2008>;
+			synaptics,reset-gpio = <&msm_gpio 12 0x0>;
+			synaptics,button-map = <139 172 158>;
+			synaptics,fw-image-name = "k7mini_014A0003";
+			synaptics,fw-image-name-second = "k7mini_014A0002";
+			synaptics,i2c-pull-up;
+			synaptics,power-down;
+			synaptics,disable-gpios;
+		};
+/* lenovo-sw zhouwl, 2014-04-29 add begin */
+	nxp_tfa9887@34 {
+		compatible = "nxp,tfa9887";
+		reg = <0x34>;
+		vdd-supply = <&pm8916_s3>;
+		vcc_i2c-supply = <&pm8916_l17>;
+/* lenovo-sw zhouwl, 2014-04-29 add end */
+	};
+};
+/* lenovo-sw wengjun1, 2014-04-18 add end */
+
+/* add bylenovo-sw2 houdz1 20140418 begin*/
+#include "lenovo-tianma-dsi-panel-otm1283-720p-video.dtsi"
+#include "lenovo-boe-dsi-panel-nt35521-720p-video.dtsi"
+&mdss_mdp {
+	qcom,mdss-pref-prim-intf = "dsi";
+};
+			
+&dsi_nt35521_boe_720_vid {
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+			/*qcom,mdss-dsi-bl-pmic-pwm-frequency = <100>;
+			qcom,mdss-dsi-bl-pmic-bank-select = <0>;
+			qcom,mdss-dsi-pwm-gpio = <&pm8916_mpps 4 0>;*/
+};
+
+			
+&dsi_otm1283_tianma_720_vid{
+	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
+			/*qcom,mdss-dsi-bl-pmic-pwm-frequency = <100>;
+			qcom,mdss-dsi-bl-pmic-bank-select = <0>;
+			qcom,mdss-dsi-pwm-gpio = <&pm8916_mpps 4 0>;*/
+};
+			
+&pmx_mdss {
+	qcom,num-grp-pins = <4>;
+	qcom,pins = <&gp 25>, <&gp 76>,<&gp 97>, <&gp 98>;
+};
+			
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_nt35521_boe_720_vid>;
+	pinctrl-names = "mdss_default", "mdss_sleep";
+	pinctrl-0 = <&mdss_dsi_active>;
+	pinctrl-1 = <&mdss_dsi_suspend>;
+			
+	qcom,platform-reset-gpio = <&msm_gpio 25 0>;
+			
+	qcom,platform-vsp-gpio = <&msm_gpio 97 0>;
+	qcom,platform-vsn-gpio = <&msm_gpio 76 0>;
+	qcom,platform-bklight-en-gpio = <&msm_gpio 98 0>;
+};
+
+/* add bylenovo-sw2 houdz1 20140418 end*/
+
+			
