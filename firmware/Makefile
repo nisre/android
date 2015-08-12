@@ -26,10 +26,6 @@ fw-shipped- += acenic/tg1.bin
 else
 acenic-objs := acenic/tg1.bin acenic/tg2.bin
 endif
-fw-shipped-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE) += Lenovo_K7mini_PVT_014D000C
-fw-shipped-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE) += Lenovo_K7mini_PVT_074D0002
-#fw-shipped-$(CONFIG_TOUCHSCREEN_MMS200_FW_UPDATE) += mms_ts
-fw-shipped-y += mms_ts_R26
 fw-shipped-$(CONFIG_ACENIC) += $(acenic-objs)
 fw-shipped-$(CONFIG_ADAPTEC_STARFIRE) += adaptec/starfire_rx.bin \
 					 adaptec/starfire_tx.bin
